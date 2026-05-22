@@ -169,6 +169,12 @@
       text-overflow: ellipsis;
       animation: marquee 8s linear infinite;
     }
+    @keyframes marquee {
+    0%   { text-indent: 0; }
+    40%  { text-indent: -120px; }
+    60%  { text-indent: -120px; }
+    100% { text-indent: 0; }
+    }
     .song-artist {
       font-size: .88rem;
       color: #9d8fc2;

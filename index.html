@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Muzic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0c0a09;
+  --bg2:#131109;
+  --card:#1a1611;
+  --card2:#201c14;
+  --orange:#ff6b1a;
+  --orange2:#ff8c42;
+  --amber:#ffb347;
+  --glow:rgba(255,107,26,.4);
+  --glow2:rgba(255,107,26,.15);
+  --text:#f5f0e8;
+  --sub:#8a7d6b;
+  --border:rgba(255,107,26,.2);
+  --nav-h:72px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;}
+
+/* ── App shell ── */
+.app{
+  width:100%;max-width:430px;
+  height:100dvh;
+  margin:0 auto;
+  position:relative;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* Ambient glow */
+.app::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 30% at 80% 10%,rgba(255,107,26,.12) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 20% at 20% 85%,rgba(255,140,66,.08) 0%,transparent 60%);
+}
+
+/* ── Screens ── */
+.screens{position:relative;height:calc(100dvh - var(--nav-h));overflow:hidden;z-index:1;}
+.screen{
+  position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding-bottom:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;
+  transform:translateX(20px);
+}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.screen::-webkit-scrollbar{display:none;}
+
+/* ── Bottom Nav ── */
+.nav{
+  position:absolute;bottom:0;left:0;right:0;
+  height:var(--nav-h);
+  background:rgba(12,10,9,.95);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  z-index:100;
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:none;border:none;cursor:pointer;
+  color:var(--sub);font-size:.65rem;font-family:'DM Sans',sans-serif;
+  transition:color .2s;padding:8px 0;
+}
+.nav-btn.active{color:var(--orange);}
+.nav-btn svg{transition:filter .2s;}
+.nav-btn.active svg{filter:drop-shadow(0 0 6px var(--orange));}
+
+/* ── Scrollbar hidden ── */
+*{scrollbar-width:none;}
+
+/* ─────────────────────────────────────────
+   HOME SCREEN
+───────────────────────────────────────── */
+.home-header{padding:28px 20px 16px;}
+.greeting{font-size:.85rem;color:var(--sub);font-weight:400;margin-bottom:2px;}
+.username{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.05em;color:var(--text);line-height:1;}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px;}
+.section-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;color:var(--text);}
+.see-all{font-size:.78rem;color:var(--orange);font-weight:500;background:none;border:none;cursor:pointer;}
+
+/* Horizontal scroll row */
+.hscroll{display:flex;gap:14px;padding:0 20px;overflow-x:auto;padding-bottom:4px;}
+.hscroll::-webkit-scrollbar{display:none;}
+
+/* Mix card */
+.mix-card{
+  flex-shrink:0;width:130px;
+  background:var(--card);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+}
+.mix-card:active{transform:scale(.96);}
+.mix-card:hover{box-shadow:0 0 20px var(--glow2);}
+.mix-thumb{
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.15rem;letter-spacing:.05em;
+  text-align:center;padding:8px;
+  position:relative;overflow:hidden;
+}
+.mix-thumb::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.6));
+}
+.mix-label{padding:8px 10px;font-size:.72rem;color:var(--sub);}
+.mix-name{font-weight:600;font-size:.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* Recent Spins */
+.spin-list{padding:0 20px;display:flex;flex-direction:column;gap:10px;}
+.spin-item{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);
+  border-radius:14px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,.04);
+  cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.spin-item:hover,.spin-item:active{background:var(--card2);border-color:var(--border);}
+.spin-thumb{
+  width:50px;height:50px;border-radius:10px;
+  flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:.7rem;text-align:center;
+}
+.spin-info{flex:1;min-width:0;}
+.spin-title{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spin-artist{font-size:.75rem;color:var(--sub);margin-top:2px;}
+.spin-play{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--orange);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 0 12px var(--glow);
+  border:none;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+}
+.spin-play:active{transform:scale(.9);}
+
+/* ─────────────────────────────────────────
+   EXPLORE SCREEN
+───────────────────────────────────────── */
+.explore-header{padding:32px 20px 20px;}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:.05em;}
+
+/* Tab bar */
+.tab-bar{display:flex;gap:0;padding:0 20px;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,.06);}
+.tab{
+  padding:8px 16px;font-size:.82rem;color:var(--sub);
+  background:none;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  font-family:'DM Sans',sans-serif;font-weight:500;
+  transition:color .2s,border-color .2s;white-space:nowrap;
+}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+
+/* Genre grid */
+.genre-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:0 20px;}
+.genre-card{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:16px;
+  padding:18px 10px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:pointer;
+  transition:background .2s,box-shadow .2s,transform .15s;
+  position:relative;overflow:hidden;
+}
+.genre-card::before{
+  content:'';position:absolute;inset:0;border-radius:16px;
+  background:radial-gradient(circle at 50% 0%,rgba(255,107,26,.12),transparent 70%);
+  opacity:0;transition:opacity .2s;
+}
+.genre-card:hover::before,.genre-card:active::before{opacity:1;}
+.genre-card:active{transform:scale(.95);}
+.genre-icon{
+  width:42px;height:42px;border-radius:10px;
+  background:rgba(255,107,26,.12);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;
+}
+.genre-name{font-size:.72rem;font-weight:600;color:var(--text);text-align:center;}
+
+/* Featured Playlists */
+.feat-list{padding:0 20px;display:flex;flex-direction:column;gap:10px;}
+.feat-item{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border-radius:14px;
+  padding:12px 14px;border:1px solid rgba(255,255,255,.04);
+  cursor:pointer;transition:border-color .2s;
+}
+.feat-item:hover{border-color:var(--border);}
+.feat-thumb{width:48px;height:48px;border-radius:10px;flex-shrink:0;overflow:hidden;}
+.feat-info .feat-title{font-weight:600;font-size:.87rem;}
+.feat-info .feat-sub{font-size:.74rem;color:var(--sub);margin-top:2px;}
+
+/* ─────────────────────────────────────────
+   LIBRARY SCREEN
+───────────────────────────────────────── */
+.library-header{padding:32px 20px 16px;}
+.lib-tabs{display:flex;gap:0;padding:0 20px;margin-bottom:18px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);}
+
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 20px;}
+.lib-card{
+  background:var(--card);border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.04);cursor:pointer;
+  transition:border-color .2s,transform .15s;
+}
+.lib-card:active{transform:scale(.97);}
+.lib-card:hover{border-color:var(--border);}
+.lib-thumb{
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  position:relative;overflow:hidden;
+}
+.lib-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.7));}
+.lib-info{padding:10px 12px 12px;}
+.lib-name{font-weight:600;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lib-sub{font-size:.72rem;color:var(--sub);margin-top:2px;}
+
+/* ─────────────────────────────────────────
+   PLAYER SCREEN
+───────────────────────────────────────── */
+.player-screen{
+  display:flex;flex-direction:column;
+  height:100%;padding:0;background:var(--bg);
+}
+
+/* Top bar */
+.player-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 20px 0;
+}
+.player-topbar .brand{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--orange);}
+
+/* Album carousel area */
+.carousel-area{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px 0 16px;
+  overflow:hidden;
+}
+.carousel-side{
+  position:absolute;
+  width:140px;height:140px;border-radius:18px;overflow:hidden;
+  opacity:.35;filter:blur(1px) brightness(.6);
+  top:50%;transform:translateY(-50%);
+  transition:.3s;
+}
+.carousel-side.left{left:8px;}
+.carousel-side.right{right:8px;}
+.carousel-main{
+  width:220px;height:220px;border-radius:22px;overflow:hidden;
+  box-shadow:0 0 40px rgba(255,107,26,.35),0 20px 60px rgba(0,0,0,.8);
+  flex-shrink:0;
+  border:1px solid rgba(255,107,26,.25);
+  position:relative;z-index:2;
+  transition:transform .2s;
+}
+.carousel-main img{width:100%;height:100%;object-fit:cover;}
+
+/* Waveform visualizer */
+.waveform-area{
+  padding:0 24px 4px;height:56px;
+  display:flex;align-items:center;justify-content:center;
+  gap:3px;overflow:hidden;
+}
+.wave-bar{
+  width:3px;border-radius:2px;
+  background:linear-gradient(180deg,var(--orange2),var(--amber));
+  animation:waveAnim 1s ease-in-out infinite alternate;
+  flex-shrink:0;
+  opacity:.7;
+}
+body.pl-playing .wave-bar{opacity:1;}
+@keyframes waveAnim{from{transform:scaleY(.15);}to{transform:scaleY(1);}}
+
+/* Song info */
+.player-info{
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.player-titles{flex:1;min-width:0;}
+.player-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:1.35rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.player-artist{font-size:.83rem;color:var(--orange2);margin-top:3px;font-weight:500;}
+.heart-btn{
+  background:none;border:none;cursor:pointer;
+  color:#ff4060;padding:8px;
+  transition:transform .2s;
+}
+.heart-btn:active{transform:scale(.85);}
+.heart-btn.liked svg{fill:#ff4060;}
+
+/* Progress */
+.progress-area{padding:0 24px;margin-bottom:6px;}
+.prog-bar-track{
+  height:4px;background:rgba(255,255,255,.1);border-radius:99px;cursor:pointer;
+  position:relative;margin-bottom:8px;
+}
+.prog-bar-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--orange),var(--amber));
+  position:relative;transition:width .1s linear;
+}
+.prog-bar-fill::after{
+  content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 8px var(--glow);
+  opacity:0;transition:opacity .2s;
+}
+.prog-bar-track:hover .prog-bar-fill::after{opacity:1;}
+.prog-times{display:flex;justify-content:space-between;font-size:.72rem;color:var(--sub);font-variant-numeric:tabular-nums;}
+#plCurrentTime{color:var(--orange2);}
+
+/* Controls */
+.player-controls{
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;
+}
+.ctrl-side{display:flex;align-items:center;gap:4px;}
+.pl-ctrl{
+  background:none;border:none;cursor:pointer;color:var(--sub);
+  padding:10px;border-radius:50%;
+  transition:color .2s,background .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.pl-ctrl:hover{color:var(--text);background:rgba(255,255,255,.05);}
+.pl-ctrl:active{transform:scale(.88);}
+.pl-ctrl.active{color:var(--orange);}
+
+.pl-prev,.pl-next{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text);cursor:pointer;
+  transition:transform .15s,box-shadow .2s;
+}
+.pl-prev:active,.pl-next:active{transform:scale(.9);}
+
+.pl-play{
+  width:66px;height:66px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange),var(--amber));
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;
+  box-shadow:0 0 0 8px rgba(255,107,26,.15),0 8px 28px rgba(255,107,26,.5);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
+}
+.pl-play:hover{transform:scale(1.07);box-shadow:0 0 0 14px rgba(255,107,26,.1),0 10px 32px rgba(255,107,26,.6);}
+.pl-play:active{transform:scale(.93);}
+
+/* Volume row */
+.vol-row{
+  display:flex;align-items:center;gap:12px;
+  padding:0 24px;
+}
+.vol-icon{color:var(--sub);flex-shrink:0;}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  flex:1;height:4px;
+  background:linear-gradient(to right,var(--orange) 0%,var(--orange) var(--vol,70%),rgba(255,255,255,.1) var(--vol,70%),rgba(255,255,255,.1) 100%);
+  border-radius:99px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--glow);cursor:pointer;}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--orange);border:none;}
+
+/* ── Gradient backgrounds for art placeholders ── */
+.grad-1{background:linear-gradient(135deg,#1a0a00,#ff6b1a55,#ff8c4233);}
+.grad-2{background:linear-gradient(135deg,#0d0d1a,#6b47ff55,#4a1fff33);}
+.grad-3{background:linear-gradient(135deg,#001a0d,#1aff6b55,#42ff8c33);}
+.grad-4{background:linear-gradient(135deg,#1a0010,#ff1a6b55,#ff4a9033);}
+.grad-5{background:linear-gradient(135deg,#1a1500,#ffcc0055,#ffaa0033);}
+.grad-6{background:linear-gradient(135deg,#00101a,#0066ff55,#0088ff33);}
+
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(26,22,17,.97);border:1px solid var(--border);color:var(--text);font-size:.8rem;padding:10px 20px;border-radius:24px;backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:500;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Profile screen placeholder */
+.profile-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--sub);gap:12px;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--amber));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#fff;box-shadow:0 0 30px var(--glow);}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.screen.active .mix-card,.screen.active .spin-item,.screen.active .genre-card,.screen.active .lib-card{
+  animation:fadeUp .35s ease both;
+}
+.screen.active .mix-card:nth-child(1),.screen.active .spin-item:nth-child(1),.screen.active .genre-card:nth-child(1),.screen.active .lib-card:nth-child(1){animation-delay:.05s;}
+.screen.active .mix-card:nth-child(2),.screen.active .spin-item:nth-child(2),.screen.active .genre-card:nth-child(2),.screen.active .lib-card:nth-child(2){animation-delay:.1s;}
+.screen.active .mix-card:nth-child(3),.screen.active .spin-item:nth-child(3),.screen.active .genre-card:nth-child(3),.screen.active .lib-card:nth-child(3){animation-delay:.15s;}
+.screen.active .mix-card:nth-child(4),.screen.active .spin-item:nth-child(4),.screen.active .genre-card:nth-child(4),.screen.active .lib-card:nth-child(4){animation-delay:.2s;}
+.screen.active .spin-item:nth-child(5),.screen.active .genre-card:nth-child(5),.screen.active .lib-card:nth-child(5){animation-delay:.25s;}
+.screen.active .genre-card:nth-child(6),.screen.active .lib-card:nth-child(6){animation-delay:.3s;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════════════════════════════
+       SCREENS
+  ══════════════════════════════════ -->
+  <div class="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="sc-home">
+      <div class="home-header">
+        <div class="greeting">Good Evening,</div>
+        <div class="username" id="userName">Aravind</div>
+      </div>
+
+      <!-- Your Mixes -->
+      <div class="section-header"><span class="section-title">Your Mixes</span><button class="see-all">See all</button></div>
+      <div class="hscroll" style="margin-bottom:24px;">
+        <div class="mix-card" onclick="openPlayer(0)">
+          <div class="mix-thumb grad-1"><span>LEGEND<br>ENTRY</span></div>
+          <div class="mix-label"><div class="mix-name">Legend Entry</div><div style="font-size:.7rem;color:var(--sub);">Aravind</div></div>
+        </div>
+        <div class="mix-card" onclick="openPlayer(1)">
+          <div class="mix-thumb grad-2"><span>ELECTRIC<br>SKIES</span></div>
+          <div class="mix-label"><div class="mix-name">Electric Skies</div><div style="font-size:.7rem;color:var(--sub);">Aether Flow</div></div>
+        </div>
+        <div class="mix-card" onclick="openPlayer(2)">
+          <div class="mix-thumb grad-3"><span>NEON<br>DREAM</span></div>
+          <div class="mix-label"><div class="mix-name">Neon Dreams</div><div style="font-size:.7rem;color:var(--sub);">Aether Flow</div></div>
+        </div>
+        <div class="mix-card" onclick="openPlayer(3)">
+          <div class="mix-thumb grad-5"><span>MELLOW<br>GOLD</span></div>
+          <div class="mix-label"><div class="mix-name">Mellow Gold</div><div style="font-size:.7rem;color:var(--sub);">Solar Wave</div></div>
+        </div>
+      </div>
+
+      <!-- Recent Spins -->
+      <div class="section-header"><span class="section-title">Recent Spins</span><button class="see-all">See all</button></div>
+      <div class="spin-list">
+        <div class="spin-item" onclick="openPlayer(0)">
+          <div class="spin-thumb grad-1"><span style="font-size:.55rem;font-family:'Bebas Neue';">LEGEND ENTRY</span></div>
+          <div class="spin-info"><div class="spin-title">Legend Entry</div><div class="spin-artist">Aravind</div></div>
+          <button class="spin-play" onclick="event.stopPropagation();openPlayer(0)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <div class="spin-item" onclick="openPlayer(4)">
+          <div class="spin-thumb grad-4"><span style="font-size:.55rem;font-family:'Bebas Neue';">HASTA LA VISTA</span></div>
+          <div class="spin-info"><div class="spin-title">Hasta La Vista Baby</div><div class="spin-artist">Gabri</div></div>
+          <button class="spin-play" onclick="event.stopPropagation();openPlayer(4)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <div class="spin-item" onclick="openPlayer(2)">
+          <div class="spin-thumb grad-3"><span style="font-size:.55rem;font-family:'Bebas Neue';">NEON DREAMS</span></div>
+          <div class="spin-info"><div class="spin-title">Neon Dreams</div><div class="spin-artist">Aether Flow</div></div>
+          <button class="spin-play" onclick="event.stopPropagation();openPlayer(2)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <div class="spin-item" onclick="openPlayer(1)">
+          <div class="spin-thumb grad-2"><span style="font-size:.55rem;font-family:'Bebas Neue';">ELECTRIC SKIES</span></div>
+          <div class="spin-info"><div class="spin-title">Electric Skies</div><div class="spin-artist">Aether Flow</div></div>
+          <button class="spin-play" onclick="event.stopPropagation();openPlayer(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLORE -->
+    <div class="screen" id="sc-explore">
+      <div class="explore-header">
+        <div class="page-title">EXPLORE</div>
+      </div>
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab(this)">Charts</button>
+        <button class="tab" onclick="switchTab(this)">New Releases</button>
+        <button class="tab" onclick="switchTab(this)">Genres</button>
+        <button class="tab" onclick="switchTab(this)">Lo-Fi</button>
+      </div>
+      <div class="genre-grid" style="margin-bottom:28px;">
+        <div class="genre-card"><div class="genre-icon">🎸</div><div class="genre-name">Rock</div></div>
+        <div class="genre-card"><div class="genre-icon">🎧</div><div class="genre-name">Lo-Fi</div></div>
+        <div class="genre-card"><div class="genre-icon">🎹</div><div class="genre-name">Classical</div></div>
+        <div class="genre-card"><div class="genre-icon">🎤</div><div class="genre-name">Hip-Hop</div></div>
+        <div class="genre-card"><div class="genre-icon">🎵</div><div class="genre-name">Songs</div></div>
+        <div class="genre-card"><div class="genre-icon">🥁</div><div class="genre-name">Beats</div></div>
+        <div class="genre-card"><div class="genre-icon">🎻</div><div class="genre-name">Indie</div></div>
+        <div class="genre-card"><div class="genre-icon">🌊</div><div class="genre-name">Chill</div></div>
+        <div class="genre-card"><div class="genre-icon">🔥</div><div class="genre-name">Trending</div></div>
+      </div>
+      <div class="section-header"><span class="section-title">Featured Playlists</span><button class="see-all">See all</button></div>
+      <div class="feat-list">
+        <div class="feat-item" onclick="openPlayer(2)">
+          <div class="feat-thumb grad-3" style="border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:.6rem;text-align:center;">NEON<br>DREAMS</div>
+          <div class="feat-info"><div class="feat-title">Neon Dreams</div><div class="feat-sub">Aether Flow · 12 tracks</div></div>
+        </div>
+        <div class="feat-item" onclick="openPlayer(1)">
+          <div class="feat-thumb grad-2" style="border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:.6rem;text-align:center;">ELECTRIC<br>SKIES</div>
+          <div class="feat-info"><div class="feat-title">Electric Skies</div><div class="feat-sub">Dead Playlists · 8 tracks</div></div>
+        </div>
+        <div class="feat-item" onclick="openPlayer(3)">
+          <div class="feat-thumb grad-5" style="border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:.6rem;text-align:center;">MELLOW<br>GOLD</div>
+          <div class="feat-info"><div class="feat-title">Mellow Gold</div><div class="feat-sub">Solar Wave · 15 tracks</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="screen" id="sc-library">
+      <div class="library-header">
+        <div class="page-title">LIBRARY</div>
+      </div>
+      <div class="tab-bar lib-tabs">
+        <button class="tab active" onclick="switchTab(this)">Your Playlists</button>
+        <button class="tab" onclick="switchTab(this)">Artists</button>
+        <button class="tab" onclick="switchTab(this)">Albums</button>
+        <button class="tab" onclick="switchTab(this)">Downloads</button>
+      </div>
+      <div class="lib-grid">
+        <div class="lib-card" onclick="openPlayer(0)">
+          <div class="lib-thumb grad-1"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">LEGEND<br>ENTRY</span></div>
+          <div class="lib-info"><div class="lib-name">Legend Entry</div><div class="lib-sub">Aravind</div></div>
+        </div>
+        <div class="lib-card" onclick="openPlayer(4)">
+          <div class="lib-thumb grad-4"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">HASTA<br>LA VISTA</span></div>
+          <div class="lib-info"><div class="lib-name">Hasta La Vista Baby</div><div class="lib-sub">Gabri</div></div>
+        </div>
+        <div class="lib-card" onclick="openPlayer(2)">
+          <div class="lib-thumb grad-3"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">NEON<br>DREAMS</span></div>
+          <div class="lib-info"><div class="lib-name">Neon Dreams</div><div class="lib-sub">Aether Flow</div></div>
+        </div>
+        <div class="lib-card" onclick="openPlayer(1)">
+          <div class="lib-thumb grad-2"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">ELECTRIC<br>SKIES</span></div>
+          <div class="lib-info"><div class="lib-name">Electric Skies</div><div class="lib-sub">Aether Flow</div></div>
+        </div>
+        <div class="lib-card" onclick="openPlayer(3)">
+          <div class="lib-thumb grad-5"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">MELLOW<br>GOLD</span></div>
+          <div class="lib-info"><div class="lib-name">Mellow Gold</div><div class="lib-sub">Solar Wave</div></div>
+        </div>
+        <div class="lib-card" onclick="openPlayer(5)">
+          <div class="lib-thumb grad-6"><span style="position:relative;z-index:1;font-family:'Bebas Neue';font-size:.9rem;text-align:center;padding:8px;">MIDNIGHT<br>DRIFT</span></div>
+          <div class="lib-info"><div class="lib-name">Midnight Drift</div><div class="lib-sub">Aether Flow</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER -->
+    <div class="screen player-screen" id="sc-player">
+      <!-- Top bar -->
+      <div class="player-topbar">
+        <div class="brand">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18V5l12-2v13" stroke="#ff6b1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="6" cy="18" r="3" stroke="#ff6b1a" stroke-width="2"/>
+            <circle cx="18" cy="16" r="3" stroke="#ff6b1a" stroke-width="2"/>
+          </svg>
+          Muzic
+        </div>
+        <button class="pl-ctrl" onclick="showToast('⋯ Options')">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+        </button>
+      </div>
+
+      <!-- Carousel -->
+      <div class="carousel-area">
+        <div class="carousel-side left" id="carouselLeft">
+          <div id="artLeft" class="grad-5" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:.75rem;text-align:center;"></div>
+        </div>
+        <div class="carousel-main">
+          <div id="artMain" class="grad-1" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:1.1rem;letter-spacing:.05em;text-align:center;padding:12px;"></div>
+        </div>
+        <div class="carousel-side right" id="carouselRight">
+          <div id="artRight" class="grad-2" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:.75rem;text-align:center;"></div>
+        </div>
+      </div>
+
+      <!-- Waveform -->
+      <div class="waveform-area" id="waveform"></div>
+
+      <!-- Info + heart -->
+      <div class="player-info">
+        <div class="player-titles">
+          <div class="player-title" id="plTitle">Legend Entry</div>
+          <div class="player-artist" id="plArtist">Aravind</div>
+        </div>
+        <button class="heart-btn" id="heartBtn" onclick="toggleLike()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4060" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-area">
+        <div class="prog-bar-track" id="plTrack">
+          <div class="prog-bar-fill" id="plFill" style="width:0%"></div>
+        </div>
+        <div class="prog-times">
+          <span id="plCurrentTime">0:00</span>
+          <span id="plTotal">0:00</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="player-controls">
+        <div class="ctrl-side">
+          <button class="pl-ctrl" id="plShuffle" onclick="toggleShuffle()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+              <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+            </svg>
+          </button>
+        </div>
+        <button class="pl-prev" onclick="prevTrack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="pl-play" id="plPlayBtn" onclick="togglePlay()">
+          <svg id="plPlayIcon" width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="plPauseIcon" width="28" height="28" viewBox="0 0 24 24" fill="white" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="pl-next" onclick="nextTrack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <div class="ctrl-side">
+          <button class="pl-ctrl" id="plRepeat" onclick="toggleRepeat()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="vol-row">
+        <svg class="vol-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <input type="range" id="plVol" min="0" max="100" value="70" style="--vol:70%" oninput="setVol(this)"/>
+        <svg class="vol-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="screen" id="sc-profile">
+      <div class="profile-screen">
+        <div class="profile-avatar">A</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;color:var(--text);">Aravind</div>
+        <div style="font-size:.85rem;">@aravind · 12 tracks</div>
+        <div style="margin-top:12px;padding:12px 24px;border:1px solid var(--border);border-radius:20px;font-size:.82rem;color:var(--orange);">Edit Profile</div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- ══════════════════════════════════
+       BOTTOM NAV
+  ══════════════════════════════════ -->
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-home" onclick="switchScreen('home')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" id="nav-explore" onclick="switchScreen('explore')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Explore
+    </button>
+    <button class="nav-btn" id="nav-player" onclick="switchScreen('player')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Now Playing
+    </button>
+    <button class="nav-btn" id="nav-library" onclick="switchScreen('library')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Library
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div><!-- /app -->
+
+<!-- Audio -->
+<audio id="audioEl" preload="metadata" crossorigin="anonymous"></audio>
+
+<script>
+/* ============================================================
+   🎵 TRACK LIST — Add your own tracks here!
+   ============================================================ */
+const TRACKS = [
+  { title:"Legend Entry",       artist:"Aravind",     src:"BGM.wav",       cover:"cover.jpg",  grad:"grad-1" },
+  { title:"Electric Skies",     artist:"Aether Flow", src:"",              cover:"",           grad:"grad-2" },
+  { title:"Neon Dreams",        artist:"Aether Flow", src:"",              cover:"",           grad:"grad-3" },
+  { title:"Mellow Gold",        artist:"Solar Wave",  src:"",              cover:"",           grad:"grad-5" },
+  { title:"Hasta La Vista Baby",artist:"Gabri",       src:"HastaLaVista.wav", cover:"gabri.jpg", grad:"grad-4" },
+  { title:"Midnight Drift",     artist:"Aether Flow", src:"",              cover:"",           grad:"grad-6" },
+];
+/* ============================================================ */
+
+const audioEl = document.getElementById('audioEl');
+let currentIdx  = 0;
+let isPlaying   = false;
+let likedSet    = new Set();
+let shuffle     = false;
+let repeat      = false;
+let scrubbing   = false;
+
+/* ── Waveform bars build ── */
+const waveDiv = document.getElementById('waveform');
+const BAR_COUNT = 42;
+for(let i=0;i<BAR_COUNT;i++){
+  const b=document.createElement('div');
+  b.className='wave-bar';
+  const h = 8 + Math.sin(i*0.4)*10 + Math.random()*18;
+  b.style.height = h+'px';
+  b.style.animationDelay = (i*0.04)+'s';
+  b.style.animationDuration = (0.5+Math.random()*0.8)+'s';
+  waveDiv.appendChild(b);
+}
+
+/* ── Screen switching ── */
+function switchScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+}
+
+/* ── Tab switching (Explore / Library) ── */
+function switchTab(el){
+  el.closest('.tab-bar').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ── Load track ── */
+function loadTrack(idx){
+  currentIdx = ((idx % TRACKS.length) + TRACKS.length) % TRACKS.length;
+  const t = TRACKS[currentIdx];
+  const prev = TRACKS[((currentIdx-1)+TRACKS.length)%TRACKS.length];
+  const next = TRACKS[(currentIdx+1)%TRACKS.length];
+
+  // Update player info
+  document.getElementById('plTitle').textContent  = t.title;
+  document.getElementById('plArtist').textContent = t.artist;
+
+  // Update carousel art
+  const artMain  = document.getElementById('artMain');
+  const artLeft  = document.getElementById('artLeft');
+  const artRight = document.getElementById('artRight');
+
+  function setArt(el, track){
+    el.className = track.grad;
+    el.style.cssText='width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Bebas Neue\';font-size:.9rem;letter-spacing:.04em;text-align:center;padding:8px;';
+    if(track.cover){
+      el.style.background='';
+      el.innerHTML=`<img src="${track.cover}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.remove()"/>`;
+    } else {
+      el.textContent=track.title;
+    }
+  }
+  setArt(artMain, t);
+  setArt(artLeft, prev);
+  setArt(artRight, next);
+
+  // Heart state
+  const hb = document.getElementById('heartBtn');
+  const svg = hb.querySelector('svg');
+  if(likedSet.has(currentIdx)){ svg.setAttribute('fill','#ff4060'); hb.classList.add('liked'); }
+  else { svg.setAttribute('fill','none'); hb.classList.remove('liked'); }
+
+  // Audio
+  if(t.src){
+    audioEl.src = t.src;
+    audioEl.load();
+    if(isPlaying) audioEl.play().catch(()=>{});
+  } else {
+    audioEl.src='';
+    document.getElementById('plFill').style.width='0%';
+    document.getElementById('plCurrentTime').textContent='0:00';
+    document.getElementById('plTotal').textContent='0:00';
+  }
+}
+
+function openPlayer(idx){
+  loadTrack(idx);
+  switchScreen('player');
+}
+
+/* ── Play/Pause ── */
+function togglePlay(){
+  if(!TRACKS[currentIdx].src){ showToast('⚠️ No audio file set for this track'); return; }
+  if(audioEl.paused){
+    audioEl.play().catch(()=>showToast('⚠️ Could not play audio'));
+    isPlaying=true;
+  } else {
+    audioEl.pause();
+    isPlaying=false;
+  }
+  updatePlayBtn();
+}
+function updatePlayBtn(){
+  document.getElementById('plPlayIcon').style.display  = isPlaying?'none':'';
+  document.getElementById('plPauseIcon').style.display = isPlaying?'':'none';
+  document.body.classList.toggle('pl-playing', isPlaying);
+}
+audioEl.addEventListener('ended',()=>{
+  if(repeat){ audioEl.currentTime=0; audioEl.play(); }
+  else { nextTrack(); }
+});
+
+/* ── Progress ── */
+audioEl.addEventListener('timeupdate',()=>{
+  if(scrubbing||!audioEl.duration) return;
+  const pct=(audioEl.currentTime/audioEl.duration)*100;
+  document.getElementById('plFill').style.width=pct+'%';
+  document.getElementById('plCurrentTime').textContent=fmt(audioEl.currentTime);
+});
+audioEl.addEventListener('loadedmetadata',()=>{
+  document.getElementById('plTotal').textContent=fmt(audioEl.duration);
+});
+
+const plTrack = document.getElementById('plTrack');
+function scrubTo(e){
+  const rect=plTrack.getBoundingClientRect();
+  const x=Math.max(0,Math.min((e.clientX||e.touches?.[0]?.clientX||0)-rect.left,rect.width));
+  const pct=x/rect.width;
+  document.getElementById('plFill').style.width=(pct*100)+'%';
+  if(audioEl.duration) audioEl.currentTime=pct*audioEl.duration;
+}
+plTrack.addEventListener('mousedown',e=>{scrubbing=true;scrubTo(e);});
+plTrack.addEventListener('touchstart',e=>{scrubbing=true;scrubTo(e);},{passive:true});
+window.addEventListener('mousemove',e=>{if(scrubbing)scrubTo(e);});
+window.addEventListener('touchmove',e=>{if(scrubbing)scrubTo(e);},{passive:true});
+window.addEventListener('mouseup',()=>scrubbing=false);
+window.addEventListener('touchend',()=>scrubbing=false);
+
+/* ── Next / Prev ── */
+function nextTrack(){ loadTrack(shuffle?Math.floor(Math.random()*TRACKS.length):currentIdx+1); }
+function prevTrack(){ if(audioEl.currentTime>3){audioEl.currentTime=0;}else{loadTrack(currentIdx-1);} }
+
+/* ── Volume ── */
+function setVol(el){ audioEl.volume=el.value/100; el.style.setProperty('--vol',el.value+'%'); }
+
+/* ── Like ── */
+function toggleLike(){
+  const hb=document.getElementById('heartBtn');
+  const svg=hb.querySelector('svg');
+  if(likedSet.has(currentIdx)){
+    likedSet.delete(currentIdx);
+    svg.setAttribute('fill','none');
+    hb.classList.remove('liked');
+    showToast('♡ Removed from Liked');
+  } else {
+    likedSet.add(currentIdx);
+    svg.setAttribute('fill','#ff4060');
+    hb.classList.add('liked');
+    showToast('❤️ Added to Liked Songs');
+  }
+}
+
+/* ── Shuffle / Repeat ── */
+function toggleShuffle(){ shuffle=!shuffle; document.getElementById('plShuffle').classList.toggle('active',shuffle); showToast(shuffle?'🔀 Shuffle on':'🔀 Shuffle off'); }
+function toggleRepeat() { repeat=!repeat;  document.getElementById('plRepeat').classList.toggle('active',repeat);  showToast(repeat? '🔁 Repeat on':'🔁 Repeat off'); }
+
+/* ── Helpers ── */
+function fmt(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2400); }
+
+/* ── Init ── */
+loadTrack(0);
+audioEl.volume=0.7;
+</script>
+</body>
+</html>

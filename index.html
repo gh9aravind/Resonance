@@ -48,14 +48,12 @@
     @keyframes cardIn { from{opacity:0;transform:translateY(32px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 
     /* ── Visualizer wrapper ── */
-    .viz-wrapper {
+     .viz-wrapper {
       position:relative;
-      width:100%;
+      width:75%;
       aspect-ratio:1;
-      margin-bottom:26px;
-      display:flex; align-items:center; justify-content:center;
-    }
-    #vizCanvas {
+      margin: 0 auto 26px;
+     #vizCanvas {
       position:absolute;
       inset:-20px;
       width:calc(100% + 40px);

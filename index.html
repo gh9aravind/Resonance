@@ -342,11 +342,20 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
     <!-- HOME -->
     <div class="screen active" id="sc-home">
       <div class="home-header">
-        <div>
-          <div class="greeting" id="homeGreeting">Good Evening,</div>
-          <div class="username" id="homeUsername">Aravind</div>
-        </div>
+       <div>
+        <div class="greeting" id="homeGreeting">Good Evening,</div>
+        <div class="username" id="homeUsername">Aravind</div>
       </div>
+      <button onclick="doLogout()" style="
+       background:rgba(255,107,26,.12);
+       border:1px solid rgba(255,107,26,.3);
+       color:#ff6b1a;border-radius:20px;
+       padding:8px 16px;font-size:.78rem;
+       font-family:'DM Sans',sans-serif;
+       font-weight:600;cursor:pointer;">
+       Logout
+      </button>
+     </div>
       <div class="section-header">
         <span class="section-title">My Songs</span>
         <span class="track-count" id="trackCountLabel">4 tracks</span>

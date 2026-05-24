@@ -837,6 +837,14 @@ function doLogin(){
   setTimeout(()=>ls.style.display='none',550);
 }
 
+  function doLogout(){
+  localStorage.removeItem('muzic_user');
+  const ls = document.getElementById('loginScreen');
+  document.getElementById('loginInput').value = '';
+  ls.style.display = '';
+  ls.classList.remove('hide');
+  document.getElementById('loginGreeting').textContent = getGreeting();
+  }
 function applyUser(name){
   document.getElementById('homeGreeting').textContent=getGreeting();
   document.getElementById('homeUsername').textContent=name;

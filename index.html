@@ -702,6 +702,20 @@ function openPlayer(idx){
 
 /* Play/Pause */
 function togglePlay(){
+  // Media Session API — notification controls
+  if('mediaSession' in navigator){
+    const t = TRACKS[currentIdx];
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  t.title,
+      artist: t.artist,
+      artwork: t.cover ? [{ src: t.cover, sizes: '512x512' }] : []
+    });
+    navigator.mediaSession.setActionHandler('play',  ()=>{ audioEl.play(); isPlaying=true; updatePlayBtn(); buildHomeList(); });
+    navigator.mediaSession.setActionHandler('pause', ()=>{ audioEl.pause(); isPlaying=false; updatePlayBtn(); buildHomeList(); });
+    navigator.mediaSession.setActionHandler('previoustrack', ()=>prevTrack());
+    navigator.mediaSession.setActionHandler('nexttrack',     ()=>nextTrack());
+  }
+  // ... ബാക്കി existing code
   if(audioEl.paused){audioEl.play().catch(()=>showToast('⚠️ Audio file not found'));isPlaying=true;}
   else{audioEl.pause();isPlaying=false;}
   updatePlayBtn();buildHomeList();

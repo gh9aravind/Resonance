@@ -685,6 +685,15 @@ function loadTrack(idx){
   // Audio
   audioEl.src=t.src;audioEl.load();
   if(isPlaying) audioEl.play().catch(()=>{});
+  // Update media session on track change
+  if('mediaSession' in navigator){
+    const t = TRACKS[currentIdx];
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  t.title,
+      artist: t.artist,
+      artwork: t.cover ? [{ src: t.cover, sizes: '512x512' }] : []
+    });
+       }
   buildHomeList();
 }
 

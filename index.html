@@ -935,18 +935,15 @@ function animateBg(){
 }
 
 function triggerBgFromCover(){
-  // Try to extract from already-rendered img in carousel
-  const img=document.querySelector('#artMain img');
-  if(img && img.complete && img.naturalWidth>0){
-    try{extractColorsFromEl(img);bgCanvas.classList.add('visible');}
-    catch(e){bgCanvas.classList.add('visible');}
+  const t = TRACKS[currentIdx];
+  if(t.colors){
+    bgColors = t.colors;
   } else {
-    // Fallback: use orange theme
-    bgColors=[[255,107,26],[180,60,10],[255,160,50],[100,40,5],[220,90,20]];
-    initBlobs();bgCanvas.classList.add('visible');
+    bgColors = [[255,107,26],[180,60,10],[255,160,50],[100,40,5],[220,90,20]];
   }
+  initBlobs();
+  bgCanvas.classList.add('visible');
 }
-
 window.addEventListener('resize',resizeBgCanvas);
 resizeBgCanvas();
 animateBg();

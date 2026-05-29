@@ -820,6 +820,9 @@ function toggleLike(){
   const svg=document.getElementById('heartBtn').querySelector('svg');
   if(likedSet.has(currentIdx)){likedSet.delete(currentIdx);svg.setAttribute('fill','none');showToast('♡ Removed');}
   else{likedSet.add(currentIdx);svg.setAttribute('fill','#ff4060');showToast('❤️ Added to Liked Songs');}
+  if(likedSet.has(currentIdx)){likedSet.delete...}
+  else{likedSet.add(currentIdx);svg.s...}
+  buildFavList();   ← ഇത് add ചെയ്യുക
 }
 
 /* Shuffle/Repeat */
@@ -836,8 +839,20 @@ function switchScreen(name){
 function switchTab(el){
   el.closest('.tab-bar').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+  const favList = document.getElementById('favList');
+  const libGrid = document.getElementById('libGrid');
+  if(favList && libGrid){
+    if(el.textContent.trim()==='Favourites'){
+      libGrid.style.display='none';
+      favList.style.display='flex';
+      favList.style.flexDirection='column';
+      buildFavList();
+    } else {
+      libGrid.style.display='';
+      favList.style.display='none';
+    }
+  }
 }
-
 /* Popup */
 function openPopup(){
   const t=TRACKS[currentIdx];

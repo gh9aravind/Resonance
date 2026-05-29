@@ -654,6 +654,36 @@ function buildLibGrid(){
     grid.appendChild(card);
   });
 }
+function buildFavList(){
+  const container = document.getElementById('favList');
+  if(!container) return;
+  container.innerHTML = '';
+  if(likedSet.size === 0){
+    container.innerHTML = '<div class="fav-empty">❤️ No favourites yet.<br>Like a song to see it here!</div>';
+    return;
+  }
+  likedSet.forEach(idx => {
+    const t = TRACKS[idx];
+    const row = document.createElement('div');
+    row.className = 'song-row';
+    row.innerHTML = `
+      <div class="song-num">${idx+1}</div>
+      <div class="song-cover ${t.cover?'':t.grad}">
+        ${t.cover?`<img src="${t.cover}" alt="" onerror="this.parentElement.classList.add('${t.grad}');this.remove()"/>`:
+        `<span>${t.title}</span>`}
+      </div>
+      <div class="song-meta">
+        <div class="song-name">${t.title}</div>
+        <div class="song-artist">${t.artist}</div>
+      </div>
+      <button class="song-play-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+      </button>`;
+    row.querySelector('.song-play-btn').addEventListener('click', e => { e.stopPropagation(); openPlayer(idx); });
+    row.addEventListener('click', () => openPlayer(idx));
+    container.appendChild(row);
+  });
+}
 
 /* Load track */
 function loadTrack(idx){

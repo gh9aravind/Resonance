@@ -850,10 +850,30 @@ function switchTab(el){
 
 /* ── Popup ── */
 function openPopup(){
-  const t=TRACKS[currentIdx];
-  document.getElementById('popupTitle').textContent=t.title;
-  document.getElementById('popupArtist').textContent=t.artist;
-  document.getElementById('popupDuration').textContent=document.getElementById('plTotal').textContent||'—';
+  const t = TRACKS[currentIdx];
+  document.getElementById('popupTitle').textContent  = t.title;
+  document.getElementById('popupArtist').textContent = t.artist;
+  document.getElementById('popupDuration').textContent = 
+    document.getElementById('plTotal').textContent || '—';
+
+  // Auto detect bitrate from file size + duration
+  const duration = audioEl.duration;
+  fetch(t.src, {method:'HEAD'})
+    .then(res => {
+      const size = res.headers.get('content-length');
+      if(size && duration){
+        const kbps = Math.round((size * 8) / duration / 1000);
+        document.getElementById('popupBitrate').textContent = kbps + ' kbps';
+      } else {
+        document.getElementById('popupBitrate').textContent = '—';
+      }
+    })
+    .catch(()=>{
+      document.getElementById('popupBitrate').textContent = '—';
+    });
+
+  document.getElementById('popupSampleRate').textContent = '44.1 kHz';
+
   document.getElementById('downloadBtn').onclick=()=>{
     const a=document.createElement('a'); a.href=t.src; a.download=t.title; a.click();
     showToast('⬇️ Downloading...');
